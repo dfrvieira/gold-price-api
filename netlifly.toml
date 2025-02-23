@@ -4,3 +4,6 @@ functions = "netlify/functions"
 [dev]
   command = "uvicorn netlify.functions.gold_price:app"
   port = 8888
+
+[dev]
+  command = "python netlify/functions/gold_price.py"

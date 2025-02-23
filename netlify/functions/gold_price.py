@@ -2,6 +2,7 @@ from fastapi import FastAPI
 import requests
 import time
 from apscheduler.schedulers.background import BackgroundScheduler
+from mangum import Mangum
 
 app = FastAPI()
 
@@ -55,6 +56,7 @@ scheduler = BackgroundScheduler()
 scheduler.add_job(fetch_gold_price, "interval", minutes=10)
 scheduler.start()
 
+fetch_gold_price()
 @app.get("/")
 async def root():
     return {"message": "API de preços do ouro está online!"}
@@ -63,4 +65,6 @@ async def root():
 async def get_gold_price():
     return gold_price_data
 
-fetch_gold_price()
+
+# Handler para Netlify
+handler = Mangum(app)
