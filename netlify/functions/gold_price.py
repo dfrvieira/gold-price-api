@@ -1,26 +1,18 @@
-from fastapi import FastAPI
+import json
 import requests
 import time
-from apscheduler.schedulers.background import BackgroundScheduler
-from mangum import Mangum
-
-app = FastAPI()
 
 API_URL = "https://economia.awesomeapi.com.br/last/XAU-EUR"
-gold_price_data = {}
 
 def fetch_gold_price():
-    global gold_price_data
     try:
         response = requests.get(API_URL)
         if response.status_code != 200:
-            print(f"❌ Erro ao acessar a API: {response.status_code}")
-            return
+            return {"error": f"Erro ao acessar a API: {response.status_code}"}
 
         data = response.json().get("XAUEUR")
         if not data:
-            print("❌ Dados não encontrados na resposta da API")
-            return
+            return {"error": "Dados não encontrados na resposta da API"}
 
         price = float(data["bid"])
         price_gram_24k = price / 31.1035
@@ -47,24 +39,17 @@ def fetch_gold_price():
             "price_gram_10k": round(price_gram_10k, 2),
         }
 
-        print(f"✅ Preço atualizado: {gold_price_data}")
+        return gold_price_data
 
     except Exception as e:
-        print(f"❌ Erro ao processar os dados: {str(e)}")
+        return {"error": str(e)}
 
-scheduler = BackgroundScheduler()
-scheduler.add_job(fetch_gold_price, "interval", minutes=10)
-scheduler.start()
-
-fetch_gold_price()
-@app.get("/")
-async def root():
-    return {"message": "API de preços do ouro está online!"}
-
-@app.get("/gold-price")
-async def get_gold_price():
-    return gold_price_data
-
-
-# Handler para Netlify
-handler = Mangum(app)
+def handler(event, context):
+    gold_price = fetch_gold_price()
+    return {
+        "statusCode": 200,
+        "body": json.dumps(gold_price),
+        "headers": {
+            "Content-Type": "application/json"
+        }
+    }
