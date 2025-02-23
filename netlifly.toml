@@ -3,3 +3,7 @@ functions = "netlify/functions"
 
 [[functions]]
 schedule = "@every 10m"  # Atualiza a cada 10 minutos
+
+[dev]
+  command = "uvicorn netlify.functions.gold_price:app"
+  port = 8888
