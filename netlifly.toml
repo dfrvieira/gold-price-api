@@ -1,0 +1,5 @@
+[build]
+functions = "netlify/functions"
+
+[[functions]]
+schedule = "@every 10m"  # Atualiza a cada 10 minutos
